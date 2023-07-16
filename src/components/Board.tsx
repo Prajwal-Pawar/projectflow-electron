@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 
 const Board = () => {
@@ -37,28 +38,70 @@ const Board = () => {
     );
   };
 
+  // dragging tasks
+  const handleDragTasks = (result: any) => {
+    const { source, destination } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    const sourceColumnId = source.droppableId;
+    const destinationColumnId = destination.droppableId;
+    const taskIndex = source.index;
+
+    setColumns((prevColumns: any) => {
+      const updatedColumns = [...prevColumns];
+
+      const sourceColumnIndex = updatedColumns.findIndex(
+        (column: any) => column.id === sourceColumnId
+      );
+
+      const destinationColumnIndex = updatedColumns.findIndex(
+        (column) => column.id === destinationColumnId
+      );
+
+      const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
+        taskIndex,
+        1
+      )[0];
+
+      updatedColumns[destinationColumnIndex].tasks.splice(
+        destination.index,
+        0,
+        task
+      );
+
+      return updatedColumns;
+    });
+  };
+
   return (
-    <div className="board">
-      {columns.map((column: any) => (
-        <Column
-          key={column.id}
-          column={column}
-          // onAddTask={(task: any) => handleAddTask(column.id, task)}
-          onAddTask={handleAddTask}
-        />
-      ))}
+    <DragDropContext onDragEnd={handleDragTasks}>
+      <div className="board">
+        {columns.map((column: any) => (
+          <Column key={column.id} column={column} onAddTask={handleAddTask} />
+        ))}
 
-      <div className="add-column">
-        <input
-          type="text"
-          value={newColumnName}
-          placeholder="Enter Column Name"
-          onChange={(e) => setNewColumnName(e.target.value)}
-        />
+        <div className="add-column">
+          <input
+            type="text"
+            value={newColumnName}
+            placeholder="Enter Column Name"
+            onChange={(e) => setNewColumnName(e.target.value)}
+          />
 
-        <button onClick={handleAddColumn}>Add Column</button>
+          <button onClick={handleAddColumn}>Add Column</button>
+        </div>
       </div>
-    </div>
+    </DragDropContext>
   );
 };
 
