@@ -2,6 +2,7 @@
   "name": "projectflow",
   "private": true,
   "version": "0.0.0",
+  "author": "Prajwal Pawar",
   "scripts": {
     "start": "vite",
     "dev": "vite",
