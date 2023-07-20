@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 
@@ -100,6 +101,9 @@ const Board = () => {
 
           <button onClick={handleAddColumn}>Add Column</button>
         </div>
+
+        {/* using link for redirecting to boards */}
+        <Link to="/">Back</Link>
       </div>
     </DragDropContext>
   );

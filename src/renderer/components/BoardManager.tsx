@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Board from "./Board";
 
 const BoardManager = () => {
   const [boards, setBoards] = useState([] as any);
   const [newBoardName, setNewBoardName] = useState("");
+
+  // for redirecting
+  const navigate = useNavigate();
 
   // add boards
   const handleAddBoard = () => {
@@ -18,6 +22,9 @@ const BoardManager = () => {
 
     setBoards((prevBoards: any) => [...prevBoards, newBoard]);
     setNewBoardName("");
+
+    // redirecting to the board
+    navigate(`/board/${newBoard.id}`);
   };
 
   // delete boards
