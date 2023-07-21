@@ -1,22 +1,13 @@
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.js
-// │
 process.env.DIST = path.join(__dirname, "../dist");
 process.env.PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, "../public");
 
 let win: BrowserWindow | null;
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
+// Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 function createWindow() {
@@ -25,6 +16,11 @@ function createWindow() {
     icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      // allow loading modules via the require () function
+      nodeIntegration: true,
+      // https://github.com/electron/electron/issues/18037#issuecomment-806320028
+      // allow loading modules via the require () function
+      contextIsolation: false,
     },
   });
 
@@ -44,8 +40,14 @@ function createWindow() {
   }
 }
 
+// Quit when all windows are closed.
 app.on("window-all-closed", () => {
-  win = null;
+  // win = null;
+
+  // On macOS app doesnt quit until the user quits explicitly with Cmd + Q
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
 
 app.whenReady().then(createWindow);
