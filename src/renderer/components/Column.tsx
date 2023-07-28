@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Task from "./Task";
 
+// ipcrenderer
+const { ipcRenderer } = require("electron");
+
 const Column = (props: any) => {
   // destructuring props
   // const { column, tasks } = props;
@@ -11,8 +14,22 @@ const Column = (props: any) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [tasks, setTasks] = useState([] as any);
 
+  useEffect(() => {
+    // Function to load tasks for the column from electron-store
+    const loadTasks = async () => {
+      try {
+        const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
+        setTasks(storedTasks);
+      } catch (err) {
+        console.error("Error loading tasks:", err);
+      }
+    };
+
+    loadTasks();
+  }, [column.id]);
+
   // add tasks
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (newTaskName.trim() === "") {
       return;
     }
@@ -23,7 +40,12 @@ const Column = (props: any) => {
     };
 
     onAddTask(column.id, newTask);
-    setTasks((prevTasks: any) => [...prevTasks, newTask]);
+    // setTasks((prevTasks: any) => [...prevTasks, newTask]);
+
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+
+    await ipcRenderer.invoke("save_tasks", column.id, updatedTasks);
 
     setNewTaskName("");
   };

@@ -79,3 +79,19 @@ ipcMain.handle("save_boards", (event, boards) => {
 ipcMain.handle("load_boards", () => {
   return store.get("boards", []);
 });
+
+// IPC endpoint to handle saving tasks to electron-store
+ipcMain.handle("save_tasks", (event, columnId, tasks) => {
+  try {
+    store.set(`tasks-${columnId}`, tasks);
+    return true;
+  } catch (err) {
+    console.error("Error saving tasks:", err);
+    return false;
+  }
+});
+
+// IPC endpoint to handle loading tasks from electron-store for a specific column
+ipcMain.handle("load_tasks", (event, columnId) => {
+  return store.get(`tasks-${columnId}`, []);
+});
