@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 
 process.env.DIST = path.join(__dirname, "../dist");
@@ -51,3 +51,31 @@ app.on("window-all-closed", () => {
 });
 
 app.whenReady().then(createWindow);
+
+// electron-store
+const Store = require("electron-store");
+
+// where our data will be stored
+// user_data is out data directory and data.json is our data file
+// const dataPath = path.join(app.getPath("userData"), "user_data", "data.json");
+const dataPath = path.join(app.getPath("userData"), "user_data");
+
+// Initialize electron-store
+// Initialize electron-store with custom path
+const store = new Store({ name: "data", cwd: dataPath });
+
+// IPC endpoint to handle saving boards to electron-store
+ipcMain.handle("save_boards", (event, boards) => {
+  try {
+    store.set("boards", boards);
+    return true;
+  } catch (err) {
+    console.error("Error saving boards:", err);
+    return false;
+  }
+});
+
+// IPC endpoint to handle loading boards from electron-store
+ipcMain.handle("load_boards", () => {
+  return store.get("boards", []);
+});

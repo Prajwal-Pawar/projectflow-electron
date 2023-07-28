@@ -5,15 +5,11 @@ import Task from "./Task";
 const Column = (props: any) => {
   // destructuring props
   // const { column, tasks } = props;
-  const { column, onAddTask } = props;
+  const { column, onAddTask, onColumnUpdate } = props;
 
   // hooks
   const [newTaskName, setNewTaskName] = useState("");
   const [tasks, setTasks] = useState([] as any);
-
-  useEffect(() => {
-    setTasks(column.tasks);
-  }, [column.tasks]);
 
   // add tasks
   const handleAddTask = () => {
@@ -31,6 +27,11 @@ const Column = (props: any) => {
 
     setNewTaskName("");
   };
+
+  useEffect(() => {
+    // Call the parent function to update the board with the updated column
+    onColumnUpdate(tasks);
+  }, [tasks]);
 
   // const handleTaskInputChange = (e: any) => {
   //   setNewTaskName(e.target.value);
