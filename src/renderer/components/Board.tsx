@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 
@@ -10,26 +10,74 @@ const Board = (props: any) => {
   // destructuring props
   const { board, onBoardUpdate } = props;
 
+  // Use the useParams hook to get the board ID from the URL
+  const { boardId } = useParams();
+
   // hooks
   // const [columns, setColumns] = useState([] as any);
   // const [columns, setColumns] = useState(board.columns || ([] as any));
   const [columns, setColumns] = useState([] as any);
   const [newColumnName, setNewColumnName] = useState("");
 
+  // Use local state to store the board data if available, otherwise use the prop
+  const [currentBoard, setCurrentBoard] = useState(board || null);
+
+  console.log("this is current board", currentBoard);
+
   useEffect(() => {
-    setColumns(board.columns || []);
-  }, [board.columns]);
+    // Load board data from the store if not available in the prop
+    const loadBoard = async () => {
+      try {
+        // Ensure boardId is available before loading
+        if (!currentBoard && boardId) {
+          const storedBoard = await ipcRenderer.invoke("load_board", boardId);
+          console.log("this is stored board", storedBoard);
+          setCurrentBoard(storedBoard);
+          setColumns(storedBoard.columns || []);
+        }
+      } catch (err) {
+        console.error("Error loading board:", err);
+      }
+    };
+
+    loadBoard();
+  }, [boardId, currentBoard]);
+
+  // useEffect(() => {
+  //   setColumns(board.columns || []);
+  // }, [board.columns]);
+
+  useEffect(() => {
+    // Check if board exists before setting the columns
+    if (board && board.columns) {
+      setColumns(board.columns || []);
+    }
+  }, [board]);
 
   // save columns to board
   const handleColumnUpdate = async (updatedColumns: any) => {
     // Create a new board object with the updated columns array
+    // const updatedBoards = {
+    //   ...board,
+    //   columns: updatedColumns,
+    // };
+
+    if (!currentBoard) {
+      return;
+    }
+
     const updatedBoards = {
-      ...board,
+      ...currentBoard,
       columns: updatedColumns,
     };
 
     // Call the parent function to update the board in the BoardManager
-    onBoardUpdate(updatedBoards);
+    // onBoardUpdate(updatedBoards);
+
+    await saveBoardToDb(updatedBoards);
+
+    setColumns(updatedColumns);
+    setCurrentBoard(updatedBoards);
   };
 
   // add columns
@@ -197,18 +245,23 @@ const Board = (props: any) => {
     updateBoardWithColumns(updatedColumns);
   };
 
-  const saveBoardsToDb = async (updatedBoards: any) => {
+  const saveBoardToDb = async (board: any) => {
     try {
-      await ipcRenderer.invoke("save_boards", updatedBoards);
+      await ipcRenderer.invoke("save_board", board);
     } catch (err) {
       console.error("Error saving boards:", err);
     }
   };
 
   const updateBoardWithColumns = async (updatedColumns: any) => {
-    const updatedBoard = { ...board, columns: updatedColumns };
-    await saveBoardsToDb(updatedBoard);
-    onBoardUpdate(updatedBoard);
+    if (!currentBoard) {
+      return;
+    }
+
+    const updatedBoard = { ...currentBoard, columns: updatedColumns };
+    await saveBoardToDb(updatedBoard);
+    // onBoardUpdate(updatedBoard);
+    setCurrentBoard(updatedBoard);
   };
 
   return (

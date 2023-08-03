@@ -95,3 +95,63 @@ ipcMain.handle("save_tasks", (event, columnId, tasks) => {
 ipcMain.handle("load_tasks", (event, columnId) => {
   return store.get(`tasks-${columnId}`, []);
 });
+
+// IPC endpoint to handle loading a specific board from the store
+// ipcMain.handle("load_board", (event, boardId) => {
+//   try {
+//     // const storedBoard = store.get(`boards.${boardId}`);
+//     const storedBoard = store.get(boardId);
+//     console.log("from main board id", boardId);
+//     console.log("from main storeboard", storedBoard);
+//     return storedBoard;
+//   } catch (err) {
+//     console.error("Error loading board:", err);
+//     return null;
+//   }
+// });
+
+ipcMain.handle("load_board", (event, boardId) => {
+  try {
+    // Get the data from data.json file
+    const data = store.get("boards") || [];
+
+    // Find the board with the given boardId
+    const storedBoard = data.find((board: any) => board.id === boardId);
+    console.log("from main board id", boardId);
+    console.log("from main storedboard", storedBoard);
+
+    return storedBoard || null;
+  } catch (err) {
+    console.error("Error loading board:", err);
+    return null;
+  }
+});
+
+// IPC endpoint to handle saving a specific board from the store
+ipcMain.handle("save_board", (event, updatedBoard) => {
+  try {
+    // Get the data from data.json file
+    const data = store.get("boards") || [];
+
+    // Find the index of the board with the given updatedBoard.id
+    const boardIndex = data.findIndex(
+      (board: any) => board.id === updatedBoard.id
+    );
+
+    // If the board with the given ID exists, update it; otherwise, add the new board to the data array
+    if (boardIndex !== -1) {
+      data[boardIndex] = updatedBoard;
+    } else {
+      data.push(updatedBoard);
+    }
+
+    // Save the updated data back to the data.json file
+    store.set("boards", data);
+
+    // Return a response to the renderer process to indicate success
+    return true;
+  } catch (err) {
+    console.error("Error saving board:", err);
+    return false;
+  }
+});

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { json, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Board from "./Board";
 
 // ipcrenderer
@@ -8,6 +8,8 @@ const { ipcRenderer } = require("electron");
 const BoardManager = () => {
   const [boards, setBoards] = useState([] as any);
   const [newBoardName, setNewBoardName] = useState("");
+  // managing a state for when i click on board link board id gets lost
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null); // State to store the selected board ID
 
   // for redirecting
   const navigate = useNavigate();
@@ -51,9 +53,9 @@ const BoardManager = () => {
     const updatedBoards = [...boards, newBoard];
     setBoards(updatedBoards);
 
-    setNewBoardName("");
-
     saveBoardsToDb(updatedBoards);
+
+    setNewBoardName("");
 
     // redirecting to the board
     // navigate(`/board/${newBoard.id}`);
@@ -69,12 +71,22 @@ const BoardManager = () => {
     saveBoardsToDb(updatedBoards);
   };
 
-  // delete boards
-  const handleDeleteBoard = (boardId: string) => {
-    setBoards((prevBoards: any) =>
-      prevBoards.filter((board: any) => board.id !== boardId)
-    );
+  // // delete boards
+  // const handleDeleteBoard = (boardId: string) => {
+  //   setBoards((prevBoards: any) =>
+  //     prevBoards.filter((board: any) => board.id !== boardId)
+  //   );
+  // };
+
+  // Function to handle board name click and redirect to the board
+  const handleBoardClick = (boardId: any) => {
+    setSelectedBoardId(boardId);
+    navigate(`/board/${boardId}`);
   };
+
+  // const handleBoardClick = (boardId: any) => {
+  //   setSelectedBoardId(boardId);
+  // };
 
   return (
     <div className="board-manager">
@@ -92,19 +104,38 @@ const BoardManager = () => {
       <div className="boards">
         {boards.map((board: any) => (
           <div key={board.id} className="board-wrapper">
-            <h2>{board.name}</h2>
-            <button onClick={() => handleDeleteBoard(board.id)}>
+            {/* Use the Link component to create a link to the board */}
+            <Link
+              to={`/board/${board.id}`}
+              onClick={() => handleBoardClick(board.id)}
+            >
+              <h2>{board.name}</h2>
+            </Link>
+            {/* <button onClick={() => handleDeleteBoard(board.id)}>
               Delete Board
-            </button>
+            </button> */}
 
-            <Board
+            {/* board id gets lost when we click on board link or redirect to link */}
+            {/* <Board
               key={board.id}
               board={board}
               onBoardUpdate={handleBoardUpdate}
-            />
+            /> */}
           </div>
         ))}
       </div>
+
+      {/* this way boards id doesnt get lost when we redirect to board */}
+      {/* conditional rendering */}
+      {/* Render the Board component only if a board is selected */}
+      {selectedBoardId && (
+        <Board
+          key={selectedBoardId}
+          // board={boards.find((board: any) => board.id === selectedBoardId)}
+          board={boards.find((board: any) => board.id === selectedBoardId)}
+          onBoardUpdate={handleBoardUpdate}
+        />
+      )}
     </div>
   );
 };
