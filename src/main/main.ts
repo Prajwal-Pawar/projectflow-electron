@@ -189,3 +189,35 @@ ipcMain.handle("save_board", (event, updatedBoard) => {
     return false;
   }
 });
+
+// IPC endpoint to handle loading tasks from a specific column from the store
+ipcMain.handle("load_tasks", (event, columnId) => {
+  try {
+    // Get the current boards from the store
+    const storedBoards = store.get("boards") || [];
+
+    // Find the board that contains the column with the matching columnId
+    const boardIndex = storedBoards.findIndex((board: any) =>
+      board.columns.some((column: any) => column.id === columnId)
+    );
+
+    if (boardIndex !== -1) {
+      const currentBoard = storedBoards[boardIndex];
+      // Find the index of the column with the matching columnId within the board
+      const column = currentBoard.columns.find(
+        (column: any) => column.id === columnId
+      );
+
+      if (column) {
+        // Return the tasks array for the column
+        return column.tasks || [];
+      }
+    }
+
+    // If the column or data is not found, return an empty array
+    return [];
+  } catch (err) {
+    console.error("Error loading tasks:", err);
+    return [];
+  }
+});

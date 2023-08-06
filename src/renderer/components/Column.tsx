@@ -28,6 +28,22 @@ const Column = (props: any) => {
   //   loadTasks();
   // }, [column.id]);
 
+  useEffect(() => {
+    // Function to load tasks for the column from electron-store
+    const loadTasks = async () => {
+      try {
+        if (column.id) {
+          const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
+          setTasks(storedTasks);
+        }
+      } catch (err) {
+        console.error("Error loading tasks:", err);
+      }
+    };
+
+    loadTasks();
+  }, [column.id]);
+
   // add tasks
   const handleAddTask = async () => {
     if (newTaskName.trim() === "") {
@@ -52,10 +68,11 @@ const Column = (props: any) => {
     setNewTaskName("");
   };
 
-  useEffect(() => {
-    // Call the parent function to update the board with the updated column
-    onColumnUpdate(tasks);
-  }, [tasks]);
+  // this is causing tasks to save in nested array in save data
+  // useEffect(() => {
+  //   // Call the parent function to update the board with the updated column
+  //   onColumnUpdate(tasks);
+  // }, [tasks]);
 
   // const handleTaskInputChange = (e: any) => {
   //   setNewTaskName(e.target.value);
