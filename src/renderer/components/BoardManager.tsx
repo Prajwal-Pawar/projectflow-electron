@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Board from "./Board";
 
-// ipcrenderer
+// IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
 
 const BoardManager = () => {
@@ -71,12 +71,17 @@ const BoardManager = () => {
     saveBoardsToDb(updatedBoards);
   };
 
-  // // delete boards
-  // const handleDeleteBoard = (boardId: string) => {
-  //   setBoards((prevBoards: any) =>
-  //     prevBoards.filter((board: any) => board.id !== boardId)
-  //   );
-  // };
+  // delete boards
+  const handleDeleteBoard = async (boardId: string) => {
+    // setBoards((prevBoards: any) =>
+    //   prevBoards.filter((board: any) => board.id !== boardId)
+    // );
+
+    const updatedBoards = boards.filter((board: any) => board.id !== boardId);
+
+    setBoards(updatedBoards);
+    saveBoardsToDb(updatedBoards);
+  };
 
   // Function to handle board name click and redirect to the board
   const handleBoardClick = (boardId: any) => {
@@ -114,6 +119,10 @@ const BoardManager = () => {
             {/* <button onClick={() => handleDeleteBoard(board.id)}>
               Delete Board
             </button> */}
+
+            <button onClick={() => handleDeleteBoard(board.id)}>
+              Delete Board
+            </button>
 
             {/* board id gets lost when we click on board link or redirect to link */}
             {/* <Board
