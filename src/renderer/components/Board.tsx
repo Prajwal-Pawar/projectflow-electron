@@ -104,31 +104,58 @@ const Board = (props: any) => {
   };
 
   // add tasks
+  // const handleAddTask = (columnId: any, task: any) => {
+  //   // setColumns((prevColumns: any) =>
+  //   //   prevColumns.map((column: any) => {
+  //   //     if (column.id === columnId) {
+  //   //       return {
+  //   //         ...column,
+  //   //         tasks: [...column.tasks, task],
+  //   //       };
+  //   //     }
+  //   //     return column;
+  //   //   })
+  //   // );
+
+  //   const updatedColumns = columns.map((column: any) => {
+  //     if (column.id === columnId) {
+  //       return {
+  //         ...column,
+  //         tasks: [...column.tasks, task],
+  //       };
+  //     }
+  //     return column;
+  //   });
+
+  //   setColumns(updatedColumns);
+  //   updateBoardWithColumns(updatedColumns);
+  // };
+
   const handleAddTask = (columnId: any, task: any) => {
-    // setColumns((prevColumns: any) =>
-    //   prevColumns.map((column: any) => {
-    //     if (column.id === columnId) {
-    //       return {
-    //         ...column,
-    //         tasks: [...column.tasks, task],
-    //       };
-    //     }
-    //     return column;
-    //   })
-    // );
+    // Find the column with the matching columnId
+    const column = columns.find((column: any) => column.id === columnId);
 
-    const updatedColumns = columns.map((column: any) => {
-      if (column.id === columnId) {
-        return {
-          ...column,
-          tasks: [...column.tasks, task],
-        };
-      }
-      return column;
-    });
+    if (column) {
+      // Create a new array with the existing tasks and the new task
+      const updatedTasks = [...column.tasks, task];
 
-    setColumns(updatedColumns);
-    updateBoardWithColumns(updatedColumns);
+      // Create a new column object with the updated tasks array
+      const updatedColumn = {
+        ...column,
+        tasks: updatedTasks,
+      };
+
+      // Create a new array with the updated column and the rest of the columns
+      const updatedColumns = columns.map((column: any) =>
+        column.id === columnId ? updatedColumn : column
+      );
+
+      // Update the state with the updated columns
+      setColumns(updatedColumns);
+
+      // Call the function to update the board with the updated columns
+      updateBoardWithColumns(updatedColumns);
+    }
   };
 
   // dragging tasks
@@ -174,6 +201,75 @@ const Board = (props: any) => {
 
   //     return updatedColumns;
   //   });
+  // };
+
+  // const handleDragTasks = (result: any) => {
+  //   const { source, destination } = result;
+
+  //   if (!destination) {
+  //     return;
+  //   }
+
+  //   if (
+  //     source.droppableId === destination.droppableId &&
+  //     source.index === destination.index
+  //   ) {
+  //     return;
+  //   }
+
+  //   const sourceColumnId = source.droppableId;
+  //   const destinationColumnId = destination.droppableId;
+  //   const taskIndex = source.index;
+
+  //   // setColumns((prevColumns: any) => {
+  //   //   const updatedColumns = [...prevColumns];
+
+  //   //   const sourceColumnIndex = updatedColumns.findIndex(
+  //   //     (column: any) => column.id === sourceColumnId
+  //   //   );
+
+  //   //   const destinationColumnIndex = updatedColumns.findIndex(
+  //   //     (column) => column.id === destinationColumnId
+  //   //   );
+
+  //   //   const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
+  //   //     taskIndex,
+  //   //     1
+  //   //   )[0];
+
+  //   //   updatedColumns[destinationColumnIndex].tasks.splice(
+  //   //     destination.index,
+  //   //     0,
+  //   //     task
+  //   //   );
+
+  //   //   return updatedColumns;
+  //   // });
+
+  //   const destinationIndex = destination.index;
+
+  //   const updatedColumns = columns.map((column: any) => {
+  //     if (column.id === sourceColumnId) {
+  //       const copiedTasks = [...column.tasks];
+  //       const [movedTask] = copiedTasks.splice(taskIndex, 1);
+  //       copiedTasks.splice(destinationIndex, 0, movedTask);
+
+  //       return {
+  //         ...column,
+  //         tasks: copiedTasks,
+  //       };
+  //     } else if (column.id === destinationColumnId) {
+  //       return {
+  //         ...column,
+  //         tasks: [...column.tasks],
+  //       };
+  //     }
+
+  //     return column;
+  //   });
+
+  //   setColumns(updatedColumns);
+  //   updateBoardWithColumns(updatedColumns);
   // };
 
   const handleDragTasks = (result: any) => {

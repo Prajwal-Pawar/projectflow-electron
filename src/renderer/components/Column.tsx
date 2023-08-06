@@ -14,19 +14,19 @@ const Column = (props: any) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [tasks, setTasks] = useState([] as any);
 
-  useEffect(() => {
-    // Function to load tasks for the column from electron-store
-    const loadTasks = async () => {
-      try {
-        const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
-        setTasks(storedTasks);
-      } catch (err) {
-        console.error("Error loading tasks:", err);
-      }
-    };
+  // useEffect(() => {
+  //   // Function to load tasks for the column from electron-store
+  //   const loadTasks = async () => {
+  //     try {
+  //       const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
+  //       setTasks(storedTasks);
+  //     } catch (err) {
+  //       console.error("Error loading tasks:", err);
+  //     }
+  //   };
 
-    loadTasks();
-  }, [column.id]);
+  //   loadTasks();
+  // }, [column.id]);
 
   // add tasks
   const handleAddTask = async () => {
@@ -44,6 +44,8 @@ const Column = (props: any) => {
 
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
+
+    console.log("this is updated tasks", updatedTasks);
 
     await ipcRenderer.invoke("save_tasks", column.id, updatedTasks);
 
