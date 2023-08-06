@@ -12,7 +12,7 @@ const Column = (props: any) => {
 
   // hooks
   const [newTaskName, setNewTaskName] = useState("");
-  const [tasks, setTasks] = useState([] as any);
+  const [tasks, setTasks] = useState(column.tasks || ([] as any));
 
   // useEffect(() => {
   //   // Function to load tasks for the column from electron-store
@@ -42,7 +42,7 @@ const Column = (props: any) => {
     };
 
     loadTasks();
-  }, [column.id]);
+  }, [column.id, tasks]);
 
   // add tasks
   const handleAddTask = async () => {
@@ -59,6 +59,7 @@ const Column = (props: any) => {
     // setTasks((prevTasks: any) => [...prevTasks, newTask]);
 
     const updatedTasks = [...tasks, newTask];
+
     setTasks(updatedTasks);
 
     console.log("this is updated tasks", updatedTasks);

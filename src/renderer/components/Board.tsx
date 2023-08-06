@@ -317,28 +317,39 @@ const Board = (props: any) => {
 
     const destinationIndex = destination.index;
 
-    const updatedColumns = columns.map((column: any) => {
-      if (column.id === sourceColumnId) {
-        const copiedTasks = [...column.tasks];
-        const [movedTask] = copiedTasks.splice(taskIndex, 1);
-        copiedTasks.splice(destinationIndex, 0, movedTask);
+    setColumns((prevColumns: any) => {
+      const updatedColumns = [...prevColumns];
 
-        return {
-          ...column,
-          tasks: copiedTasks,
-        };
-      } else if (column.id === destinationColumnId) {
-        return {
-          ...column,
-          tasks: [...column.tasks],
-        };
-      }
+      const sourceColumnIndex = updatedColumns.findIndex(
+        (column: any) => column.id === sourceColumnId
+      );
 
-      return column;
+      const destinationColumnIndex = updatedColumns.findIndex(
+        (column) => column.id === destinationColumnId
+      );
+
+      const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
+        taskIndex,
+        1
+      )[0];
+
+      updatedColumns[destinationColumnIndex].tasks.splice(
+        destinationIndex,
+        0,
+        task
+      );
+
+      // Update the state with the updated columns
+      setColumns(updatedColumns);
+
+      // Save the updated columns to the database
+      updateBoardWithColumns(updatedColumns);
+
+      return updatedColumns;
     });
 
-    setColumns(updatedColumns);
-    updateBoardWithColumns(updatedColumns);
+    // setColumns(updatedColumns);
+    // updateBoardWithColumns(updatedColumns);
   };
 
   const saveBoardToDb = async (board: any) => {
