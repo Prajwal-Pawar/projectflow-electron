@@ -64,9 +64,12 @@ const dataPath = path.join(app.getPath("userData"), "user_data");
 // Initialize electron-store with custom path
 const store = new Store({ name: "data", cwd: dataPath });
 
+// IpcMain for communicating Renderer process from Main process
+
 // IPC endpoint to handle saving boards to electron-store
 ipcMain.handle("save_boards", (event, boards) => {
   try {
+    // saving all boards in array named board
     store.set("boards", boards);
     return true;
   } catch (err) {
@@ -80,30 +83,70 @@ ipcMain.handle("load_boards", () => {
   return store.get("boards", []);
 });
 
-// IPC endpoint to handle saving tasks to electron-store
-// ipcMain.handle("save_tasks", (event, columnId, tasks) => {
-//   try {
-//     store.set(`tasks-${columnId}`, tasks);
-//     return true;
-//   } catch (err) {
-//     console.error("Error saving tasks:", err);
-//     return false;
-//   }
-// });
+// IPC endpoint to handle saving a specific board to the store
+/* if we add column to specific board, we need to save that column into that 
+specific board */
+ipcMain.handle("save_board", (event, updatedBoard) => {
+  try {
+    // Get all boards from store/data
+    const boards = store.get("boards") || [];
 
+    // Find the index of the board with the given updatedBoard.id
+    // Find current/active boards index -> (current board has updates)
+    const boardIndex = boards.findIndex(
+      (board: any) => board.id === updatedBoard.id
+    );
+
+    // If the board with the given ID exists, update it; otherwise, add the new board to the boards array
+    if (boardIndex !== -1) {
+      boards[boardIndex] = updatedBoard;
+    } else {
+      boards.push(updatedBoard);
+    }
+
+    // Save the updated board in store/data
+    store.set("boards", boards);
+
+    // Return a response to the renderer process to indicate success
+    return true;
+  } catch (err) {
+    console.error("Error saving board:", err);
+    return false;
+  }
+});
+
+// IPC endpoint to handle loading a specific board from the store
+ipcMain.handle("load_board", (event, boardId) => {
+  try {
+    // Get all boards from store/data
+    const boards = store.get("boards") || [];
+
+    // Find the board with the given boardId
+    // Find current/active board to load specific columns according to that board
+    const storedBoard = boards.find((board: any) => board.id === boardId);
+
+    return storedBoard || null;
+  } catch (err) {
+    console.error("Error loading board:", err);
+    return null;
+  }
+});
+
+// IPC endpoint to handle saving tasks to a specific column to a specific board to the store
 ipcMain.handle("save_tasks", (event, columnId, tasks) => {
   try {
-    // Get the current boards from the store
-    const storedBoards = store.get("boards") || [];
+    // Get all boards from store/data
+    const boards = store.get("boards") || [];
 
     // Find the board that contains the column with the matching columnId
-    const boardIndex = storedBoards.findIndex((board: any) =>
+    const boardIndex = boards.findIndex((board: any) =>
       board.columns.some((column: any) => column.id === columnId)
     );
 
+    // If the board with the given ID exists
     if (boardIndex !== -1) {
-      const currentBoard = storedBoards[boardIndex];
-      // Find the index of the column with the matching columnId within the board
+      const currentBoard = boards[boardIndex];
+      // Find the column with the matching columnId within the current/active board
       const column = currentBoard.columns.find(
         (column: any) => column.id === columnId
       );
@@ -113,7 +156,7 @@ ipcMain.handle("save_tasks", (event, columnId, tasks) => {
         column.tasks = tasks;
 
         // Save the updated boards back to the store
-        store.set("boards", storedBoards);
+        store.set("boards", boards);
       }
     }
 
@@ -125,91 +168,27 @@ ipcMain.handle("save_tasks", (event, columnId, tasks) => {
   }
 });
 
-// IPC endpoint to handle loading tasks from electron-store for a specific column
-// ipcMain.handle("load_tasks", (event, columnId) => {
-//   return store.get(`tasks-${columnId}`, []);
-// });
-
-// IPC endpoint to handle loading a specific board from the store
-// ipcMain.handle("load_board", (event, boardId) => {
-//   try {
-//     // const storedBoard = store.get(`boards.${boardId}`);
-//     const storedBoard = store.get(boardId);
-//     console.log("from main board id", boardId);
-//     console.log("from main storeboard", storedBoard);
-//     return storedBoard;
-//   } catch (err) {
-//     console.error("Error loading board:", err);
-//     return null;
-//   }
-// });
-
-ipcMain.handle("load_board", (event, boardId) => {
-  try {
-    // Get the current boards from store/data
-    const data = store.get("boards") || [];
-
-    // Find the board with the given boardId
-    const storedBoard = data.find((board: any) => board.id === boardId);
-    console.log("from main board id", boardId);
-    console.log("from main storedboard", storedBoard);
-
-    return storedBoard || null;
-  } catch (err) {
-    console.error("Error loading board:", err);
-    return null;
-  }
-});
-
-// IPC endpoint to handle saving a specific board from the store
-ipcMain.handle("save_board", (event, updatedBoard) => {
-  try {
-    // Get the current boards from store/data
-    const data = store.get("boards") || [];
-
-    // Find the index of the board with the given updatedBoard.id
-    const boardIndex = data.findIndex(
-      (board: any) => board.id === updatedBoard.id
-    );
-
-    // If the board with the given ID exists, update it; otherwise, add the new board to the data array
-    if (boardIndex !== -1) {
-      data[boardIndex] = updatedBoard;
-    } else {
-      data.push(updatedBoard);
-    }
-
-    // Save the updated board in boards/data
-    store.set("boards", data);
-
-    // Return a response to the renderer process to indicate success
-    return true;
-  } catch (err) {
-    console.error("Error saving board:", err);
-    return false;
-  }
-});
-
-// IPC endpoint to handle loading tasks from a specific column from the store
+// IPC endpoint to handle loading tasks from a specific column from a specific board from the store
 ipcMain.handle("load_tasks", (event, columnId) => {
   try {
-    // Get the current boards from the store
-    const storedBoards = store.get("boards") || [];
+    // Get all boards from store/data
+    const boards = store.get("boards") || [];
 
     // Find the board that contains the column with the matching columnId
-    const boardIndex = storedBoards.findIndex((board: any) =>
+    const boardIndex = boards.findIndex((board: any) =>
       board.columns.some((column: any) => column.id === columnId)
     );
 
+    // If the board with the given ID exists
     if (boardIndex !== -1) {
-      const currentBoard = storedBoards[boardIndex];
-      // Find the index of the column with the matching columnId within the board
+      const currentBoard = boards[boardIndex];
+      // Find the column with the matching columnId within the current/active board
       const column = currentBoard.columns.find(
         (column: any) => column.id === columnId
       );
 
       if (column) {
-        // Return the tasks array for the column
+        // Return the tasks array from that specific column
         return column.tasks || [];
       }
     }
