@@ -8,7 +8,7 @@ const { ipcRenderer } = require("electron");
 const Column = (props: any) => {
   // destructuring props
   // const { column, tasks } = props;
-  const { column, onAddTask, onColumnUpdate } = props;
+  const { column, onAddTask, onColumnUpdate, onDeleteColumn } = props;
 
   // hooks
   const [newTaskName, setNewTaskName] = useState("");
@@ -69,6 +69,26 @@ const Column = (props: any) => {
     setNewTaskName("");
   };
 
+  // Function to handle the deletion of a task
+  const handleDeleteTask = async (taskId: string) => {
+    // Find the index of the task with the given taskId in the current column
+    const taskIndex = tasks.findIndex((task: any) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      // Create a copy of the tasks array
+      const updatedTasks = [...tasks];
+
+      // Remove the task with the given taskId from the updatedTasks array
+      updatedTasks.splice(taskIndex, 1);
+
+      // Update the state with the updated tasks
+      setTasks(updatedTasks);
+
+      // Save the updated tasks to data.json
+      await ipcRenderer.invoke("save_tasks", column.id, updatedTasks);
+    }
+  };
+
   // this is causing tasks to save in nested array in save data
   // useEffect(() => {
   //   // Call the parent function to update the board with the updated column
@@ -90,7 +110,12 @@ const Column = (props: any) => {
             ref={provided.innerRef}
           >
             {tasks.map((task: any, index: any) => (
-              <Task key={task.id} task={task} index={index} />
+              <Task
+                key={task.id}
+                task={task}
+                index={index}
+                onDeleteTask={handleDeleteTask}
+              />
             ))}
             {provided.placeholder}
           </div>
@@ -108,6 +133,8 @@ const Column = (props: any) => {
 
         <button onClick={handleAddTask}>Add Task</button>
       </div>
+
+      <button onClick={() => onDeleteColumn(column.id)}>Delete Column</button>
     </div>
   );
 };

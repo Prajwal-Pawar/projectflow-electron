@@ -371,6 +371,28 @@ const Board = (props: any) => {
     setCurrentBoard(updatedBoard);
   };
 
+  // Function to handle the deletion of a column
+  const handleDeleteColumn = async (columnId: string) => {
+    // Find the index of the column with the given columnId
+    const columnIndex = columns.findIndex(
+      (column: any) => column.id === columnId
+    );
+
+    if (columnIndex !== -1) {
+      // Create a copy of the columns array
+      const updatedColumns = [...columns];
+
+      // Remove the column with the given columnId from the updatedColumns array
+      updatedColumns.splice(columnIndex, 1);
+
+      // Update the state with the updated columns
+      setColumns(updatedColumns);
+
+      // Save the updated columns to the database
+      updateBoardWithColumns(updatedColumns);
+    }
+  };
+
   return (
     <DragDropContext onDragEnd={handleDragTasks}>
       <div className="board">
@@ -382,6 +404,7 @@ const Board = (props: any) => {
             onColumnUpdate={(updatedTasks: any) =>
               handleAddTask(column.id, updatedTasks)
             }
+            onDeleteColumn={handleDeleteColumn}
           />
         ))}
 

@@ -2,7 +2,7 @@ import { Draggable } from "react-beautiful-dnd";
 
 const Task = (props: any) => {
   // destructuring props
-  const { task, index } = props;
+  const { task, index, onDeleteTask } = props;
 
   return (
     <Draggable draggableId={task.id} index={index}>
@@ -14,6 +14,8 @@ const Task = (props: any) => {
           ref={provided.innerRef}
         >
           {task.name}
+
+          <button onClick={() => onDeleteTask(task.id)}>Delete Tasks</button>
         </div>
       )}
     </Draggable>
