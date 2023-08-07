@@ -95,6 +95,10 @@ const BoardManager = () => {
 
   return (
     <div className="board-manager">
+      {/* welcome message and boards count */}
+      <h2>Welcome Back!</h2>
+      <h3>You have {boards.length} active boards</h3>
+
       <div className="add-board">
         <input
           type="text"

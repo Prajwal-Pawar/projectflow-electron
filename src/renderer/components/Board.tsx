@@ -217,6 +217,9 @@ const Board = (props: any) => {
 
   return (
     <DragDropContext onDragEnd={handleDragTasks}>
+      {/* rendering boards name */}
+      <h1>{currentBoard ? currentBoard.name : null}</h1>
+
       <div className="board">
         {/* render all columns */}
         {columns.map((column: any) => (
