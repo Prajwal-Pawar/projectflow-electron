@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
 
-// ipcrenderer
+// IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
 
 const Board = (props: any) => {
@@ -14,25 +14,22 @@ const Board = (props: any) => {
   const { boardId } = useParams();
 
   // hooks
-  // const [columns, setColumns] = useState([] as any);
-  // const [columns, setColumns] = useState(board.columns || ([] as any));
   const [columns, setColumns] = useState([] as any);
   const [newColumnName, setNewColumnName] = useState("");
-
   // Use local state to store the board data if available, otherwise use the prop
   const [currentBoard, setCurrentBoard] = useState(board || null);
 
-  console.log("this is current board", currentBoard);
-
   useEffect(() => {
-    // Load board data from the store if not available in the prop
+    // Function to load board data from data.json if not available in the prop
     const loadBoard = async () => {
       try {
         // Ensure boardId is available before loading
         if (!currentBoard && boardId) {
+          // load_board call to IpcMain process
           const storedBoard = await ipcRenderer.invoke("load_board", boardId);
-          console.log("this is stored board", storedBoard);
+          // Update the state of board with the board stored in data.json
           setCurrentBoard(storedBoard);
+          // Update the state with the columns stored in data.json
           setColumns(storedBoard.columns || []);
         }
       } catch (err) {
@@ -43,10 +40,6 @@ const Board = (props: any) => {
     loadBoard();
   }, [boardId, currentBoard]);
 
-  // useEffect(() => {
-  //   setColumns(board.columns || []);
-  // }, [board.columns]);
-
   useEffect(() => {
     // Check if board exists before setting the columns
     if (board && board.columns) {
@@ -54,34 +47,28 @@ const Board = (props: any) => {
     }
   }, [board]);
 
-  // save columns to board
+  // Function to save columns to board
   const handleColumnUpdate = async (updatedColumns: any) => {
-    // Create a new board object with the updated columns array
-    // const updatedBoards = {
-    //   ...board,
-    //   columns: updatedColumns,
-    // };
-
     if (!currentBoard) {
       return;
     }
 
+    // updated board is current board data and newly added column data
     const updatedBoards = {
       ...currentBoard,
       columns: updatedColumns,
     };
 
-    // Call the parent function to update the board in the BoardManager
-    // onBoardUpdate(updatedBoards);
-
     await saveBoardToDb(updatedBoards);
 
+    // Update the state with the updated columns
     setColumns(updatedColumns);
     setCurrentBoard(updatedBoards);
   };
 
-  // add columns
+  // Function to add new columns
   const handleAddColumn = () => {
+    // If input is empty, return
     if (newColumnName.trim() === "") {
       return;
     }
@@ -92,45 +79,18 @@ const Board = (props: any) => {
       tasks: [],
     };
 
-    // setColumns((prevColumns: any) => [...prevColumns, newColumn]);
-
+    // updated column is all the existing columns and newly added column
     const updatedColumns = [...columns, newColumn];
+
+    // Update the state with the updated columns
     setColumns(updatedColumns);
-
-    setNewColumnName("");
-
-    // updateBoardWithColumns(updatedColumns);
     handleColumnUpdate(updatedColumns);
+
+    // clear the input
+    setNewColumnName("");
   };
 
-  // add tasks
-  // const handleAddTask = (columnId: any, task: any) => {
-  //   // setColumns((prevColumns: any) =>
-  //   //   prevColumns.map((column: any) => {
-  //   //     if (column.id === columnId) {
-  //   //       return {
-  //   //         ...column,
-  //   //         tasks: [...column.tasks, task],
-  //   //       };
-  //   //     }
-  //   //     return column;
-  //   //   })
-  //   // );
-
-  //   const updatedColumns = columns.map((column: any) => {
-  //     if (column.id === columnId) {
-  //       return {
-  //         ...column,
-  //         tasks: [...column.tasks, task],
-  //       };
-  //     }
-  //     return column;
-  //   });
-
-  //   setColumns(updatedColumns);
-  //   updateBoardWithColumns(updatedColumns);
-  // };
-
+  // Function to add new tasks
   const handleAddTask = (columnId: any, task: any) => {
     // Find the column with the matching columnId
     const column = columns.find((column: any) => column.id === columnId);
@@ -158,120 +118,7 @@ const Board = (props: any) => {
     }
   };
 
-  // dragging tasks
-  // const handleDragTasks = (result: any) => {
-  //   const { source, destination } = result;
-
-  //   if (!destination) {
-  //     return;
-  //   }
-
-  //   if (
-  //     source.droppableId === destination.droppableId &&
-  //     source.index === destination.index
-  //   ) {
-  //     return;
-  //   }
-
-  //   const sourceColumnId = source.droppableId;
-  //   const destinationColumnId = destination.droppableId;
-  //   const taskIndex = source.index;
-
-  //   setColumns((prevColumns: any) => {
-  //     const updatedColumns = [...prevColumns];
-
-  //     const sourceColumnIndex = updatedColumns.findIndex(
-  //       (column: any) => column.id === sourceColumnId
-  //     );
-
-  //     const destinationColumnIndex = updatedColumns.findIndex(
-  //       (column) => column.id === destinationColumnId
-  //     );
-
-  //     const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
-  //       taskIndex,
-  //       1
-  //     )[0];
-
-  //     updatedColumns[destinationColumnIndex].tasks.splice(
-  //       destination.index,
-  //       0,
-  //       task
-  //     );
-
-  //     return updatedColumns;
-  //   });
-  // };
-
-  // const handleDragTasks = (result: any) => {
-  //   const { source, destination } = result;
-
-  //   if (!destination) {
-  //     return;
-  //   }
-
-  //   if (
-  //     source.droppableId === destination.droppableId &&
-  //     source.index === destination.index
-  //   ) {
-  //     return;
-  //   }
-
-  //   const sourceColumnId = source.droppableId;
-  //   const destinationColumnId = destination.droppableId;
-  //   const taskIndex = source.index;
-
-  //   // setColumns((prevColumns: any) => {
-  //   //   const updatedColumns = [...prevColumns];
-
-  //   //   const sourceColumnIndex = updatedColumns.findIndex(
-  //   //     (column: any) => column.id === sourceColumnId
-  //   //   );
-
-  //   //   const destinationColumnIndex = updatedColumns.findIndex(
-  //   //     (column) => column.id === destinationColumnId
-  //   //   );
-
-  //   //   const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
-  //   //     taskIndex,
-  //   //     1
-  //   //   )[0];
-
-  //   //   updatedColumns[destinationColumnIndex].tasks.splice(
-  //   //     destination.index,
-  //   //     0,
-  //   //     task
-  //   //   );
-
-  //   //   return updatedColumns;
-  //   // });
-
-  //   const destinationIndex = destination.index;
-
-  //   const updatedColumns = columns.map((column: any) => {
-  //     if (column.id === sourceColumnId) {
-  //       const copiedTasks = [...column.tasks];
-  //       const [movedTask] = copiedTasks.splice(taskIndex, 1);
-  //       copiedTasks.splice(destinationIndex, 0, movedTask);
-
-  //       return {
-  //         ...column,
-  //         tasks: copiedTasks,
-  //       };
-  //     } else if (column.id === destinationColumnId) {
-  //       return {
-  //         ...column,
-  //         tasks: [...column.tasks],
-  //       };
-  //     }
-
-  //     return column;
-  //   });
-
-  //   setColumns(updatedColumns);
-  //   updateBoardWithColumns(updatedColumns);
-  // };
-
+  // Function for handling dragging of tasks
   const handleDragTasks = (result: any) => {
     const { source, destination } = result;
 
@@ -279,6 +126,7 @@ const Board = (props: any) => {
       return;
     }
 
+    // If dragged tasks source column and destination column is same, return
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
@@ -289,34 +137,9 @@ const Board = (props: any) => {
     const sourceColumnId = source.droppableId;
     const destinationColumnId = destination.droppableId;
     const taskIndex = source.index;
-
-    // setColumns((prevColumns: any) => {
-    //   const updatedColumns = [...prevColumns];
-
-    //   const sourceColumnIndex = updatedColumns.findIndex(
-    //     (column: any) => column.id === sourceColumnId
-    //   );
-
-    //   const destinationColumnIndex = updatedColumns.findIndex(
-    //     (column) => column.id === destinationColumnId
-    //   );
-
-    //   const task: any = updatedColumns[sourceColumnIndex].tasks.splice(
-    //     taskIndex,
-    //     1
-    //   )[0];
-
-    //   updatedColumns[destinationColumnIndex].tasks.splice(
-    //     destination.index,
-    //     0,
-    //     task
-    //   );
-
-    //   return updatedColumns;
-    // });
-
     const destinationIndex = destination.index;
 
+    // Update the state with the updated columns
     setColumns((prevColumns: any) => {
       const updatedColumns = [...prevColumns];
 
@@ -347,11 +170,9 @@ const Board = (props: any) => {
 
       return updatedColumns;
     });
-
-    // setColumns(updatedColumns);
-    // updateBoardWithColumns(updatedColumns);
   };
 
+  // Function for saving specific board to electron-store/data.json
   const saveBoardToDb = async (board: any) => {
     try {
       await ipcRenderer.invoke("save_board", board);
@@ -360,14 +181,16 @@ const Board = (props: any) => {
     }
   };
 
+  // Function to save the updated columns to the database
   const updateBoardWithColumns = async (updatedColumns: any) => {
     if (!currentBoard) {
       return;
     }
 
     const updatedBoard = { ...currentBoard, columns: updatedColumns };
+
     await saveBoardToDb(updatedBoard);
-    // onBoardUpdate(updatedBoard);
+    // Update the state of board with the updated board
     setCurrentBoard(updatedBoard);
   };
 
@@ -382,12 +205,11 @@ const Board = (props: any) => {
       // Create a copy of the columns array
       const updatedColumns = [...columns];
 
-      // Remove the column with the given columnId from the updatedColumns array
+      // Remove the column with the given column index from the updatedColumns array
       updatedColumns.splice(columnIndex, 1);
 
       // Update the state with the updated columns
       setColumns(updatedColumns);
-
       // Save the updated columns to the database
       updateBoardWithColumns(updatedColumns);
     }
@@ -396,6 +218,7 @@ const Board = (props: any) => {
   return (
     <DragDropContext onDragEnd={handleDragTasks}>
       <div className="board">
+        {/* render all columns */}
         {columns.map((column: any) => (
           <Column
             key={column.id}
@@ -416,10 +239,11 @@ const Board = (props: any) => {
             onChange={(e) => setNewColumnName(e.target.value)}
           />
 
+          {/* Button to add new columns */}
           <button onClick={handleAddColumn}>Add Column</button>
         </div>
 
-        {/* using link for redirecting to boards */}
+        {/* using link for redirecting to all boards */}
         <Link to="/">Back</Link>
       </div>
     </DragDropContext>

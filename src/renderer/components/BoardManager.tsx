@@ -8,17 +8,20 @@ const { ipcRenderer } = require("electron");
 const BoardManager = () => {
   const [boards, setBoards] = useState([] as any);
   const [newBoardName, setNewBoardName] = useState("");
-  // managing a state for when i click on board link board id gets lost
-  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null); // State to store the selected board ID
+  // State to store the selected board ID
+  // Managing a state for when i click on board link board id gets lost
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
 
   // for redirecting
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Function to load boards from electron-store
+    // Function to load boards from electron-store/data.json
     const loadBoards = async () => {
       try {
+        // load_boards call to IpcMain process
         const storedBoards = await ipcRenderer.invoke("load_boards");
+        // Update the state of boards with the boards stored in data.json
         setBoards(storedBoards);
       } catch (err) {
         console.error("Error loading boards:", err);
@@ -28,16 +31,19 @@ const BoardManager = () => {
     loadBoards();
   }, []);
 
+  // Function for saving boards to electron-store/data.json
   const saveBoardsToDb = async (updatedBoards: any) => {
     try {
+      // save_boards call to IpcMain process
       await ipcRenderer.invoke("save_boards", updatedBoards);
     } catch (err) {
       console.error("Error saving boards:", err);
     }
   };
 
-  // add boards
+  // Function to add new boards
   const handleAddBoard = async () => {
+    // If input is empty, return
     if (newBoardName.trim() === "") {
       return;
     }
@@ -48,50 +54,44 @@ const BoardManager = () => {
       columns: [],
     };
 
-    // setBoards((prevBoards: any) => [...prevBoards, newBoard]);
-
+    // updated board is all the existing board and newly added board
     const updatedBoards = [...boards, newBoard];
-    setBoards(updatedBoards);
 
+    // Update the state of boards with the updated board
+    setBoards(updatedBoards);
     saveBoardsToDb(updatedBoards);
 
+    // clear the input
     setNewBoardName("");
-
-    // redirecting to the board
-    // navigate(`/board/${newBoard.id}`);
   };
 
   // Function to update the board with updated columns
   const handleBoardUpdate = (updatedBoard: any) => {
+    // Gets updated board if board id matches with updated boards id
     const updatedBoards = boards.map((board: any) =>
       board.id === updatedBoard.id ? updatedBoard : board
     );
 
+    // Update the state of boards with the updated board
     setBoards(updatedBoards);
     saveBoardsToDb(updatedBoards);
   };
 
-  // delete boards
+  // Function to delete board
   const handleDeleteBoard = async (boardId: string) => {
-    // setBoards((prevBoards: any) =>
-    //   prevBoards.filter((board: any) => board.id !== boardId)
-    // );
-
     const updatedBoards = boards.filter((board: any) => board.id !== boardId);
 
+    // Update the state of boards with the updated board
     setBoards(updatedBoards);
     saveBoardsToDb(updatedBoards);
   };
 
-  // Function to handle board name click and redirect to the board
+  // Function to handle board name click and redirect to the specific board
+  // With boardId redirect user to the specific board
   const handleBoardClick = (boardId: any) => {
     setSelectedBoardId(boardId);
     navigate(`/board/${boardId}`);
   };
-
-  // const handleBoardClick = (boardId: any) => {
-  //   setSelectedBoardId(boardId);
-  // };
 
   return (
     <div className="board-manager">
@@ -103,6 +103,7 @@ const BoardManager = () => {
           onChange={(e) => setNewBoardName(e.target.value)}
         />
 
+        {/* Add new board button */}
         <button onClick={handleAddBoard}>Add Board</button>
       </div>
 
@@ -116,20 +117,11 @@ const BoardManager = () => {
             >
               <h2>{board.name}</h2>
             </Link>
-            {/* <button onClick={() => handleDeleteBoard(board.id)}>
-              Delete Board
-            </button> */}
 
+            {/* Delete board button */}
             <button onClick={() => handleDeleteBoard(board.id)}>
               Delete Board
             </button>
-
-            {/* board id gets lost when we click on board link or redirect to link */}
-            {/* <Board
-              key={board.id}
-              board={board}
-              onBoardUpdate={handleBoardUpdate}
-            /> */}
           </div>
         ))}
       </div>
@@ -140,7 +132,6 @@ const BoardManager = () => {
       {selectedBoardId && (
         <Board
           key={selectedBoardId}
-          // board={boards.find((board: any) => board.id === selectedBoardId)}
           board={boards.find((board: any) => board.id === selectedBoardId)}
           onBoardUpdate={handleBoardUpdate}
         />

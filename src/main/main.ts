@@ -66,7 +66,7 @@ const store = new Store({ name: "data", cwd: dataPath });
 
 // IpcMain for communicating Renderer process from Main process
 
-// IPC endpoint to handle saving boards to electron-store
+// IPC endpoint to handle saving boards to data.json
 ipcMain.handle("save_boards", (event, boards) => {
   try {
     // saving all boards in array named board
@@ -78,17 +78,17 @@ ipcMain.handle("save_boards", (event, boards) => {
   }
 });
 
-// IPC endpoint to handle loading boards from electron-store
+// IPC endpoint to handle loading boards from data.json
 ipcMain.handle("load_boards", () => {
   return store.get("boards", []);
 });
 
-// IPC endpoint to handle saving a specific board to the store
+// IPC endpoint to handle saving a specific board to the store/data.json
 /* if we add column to specific board, we need to save that column into that 
 specific board */
 ipcMain.handle("save_board", (event, updatedBoard) => {
   try {
-    // Get all boards from store/data
+    // Get all boards from store/data.json
     const boards = store.get("boards") || [];
 
     // Find the index of the board with the given updatedBoard.id
@@ -104,7 +104,7 @@ ipcMain.handle("save_board", (event, updatedBoard) => {
       boards.push(updatedBoard);
     }
 
-    // Save the updated board in store/data
+    // Save the updated board in store/data.json
     store.set("boards", boards);
 
     // Return a response to the renderer process to indicate success
@@ -115,10 +115,10 @@ ipcMain.handle("save_board", (event, updatedBoard) => {
   }
 });
 
-// IPC endpoint to handle loading a specific board from the store
+// IPC endpoint to handle loading a specific board from the store/data.json
 ipcMain.handle("load_board", (event, boardId) => {
   try {
-    // Get all boards from store/data
+    // Get all boards from store/data.json
     const boards = store.get("boards") || [];
 
     // Find the board with the given boardId
@@ -132,10 +132,10 @@ ipcMain.handle("load_board", (event, boardId) => {
   }
 });
 
-// IPC endpoint to handle saving tasks to a specific column to a specific board to the store
+// IPC endpoint to handle saving tasks to a specific column to a specific board to the data.json
 ipcMain.handle("save_tasks", (event, columnId, tasks) => {
   try {
-    // Get all boards from store/data
+    // Get all boards from store/data.json
     const boards = store.get("boards") || [];
 
     // Find the board that contains the column with the matching columnId
@@ -155,7 +155,7 @@ ipcMain.handle("save_tasks", (event, columnId, tasks) => {
         // If the column exists, update its tasks
         column.tasks = tasks;
 
-        // Save the updated boards back to the store
+        // Save the updated boards back to the store/data.json
         store.set("boards", boards);
       }
     }
@@ -168,10 +168,10 @@ ipcMain.handle("save_tasks", (event, columnId, tasks) => {
   }
 });
 
-// IPC endpoint to handle loading tasks from a specific column from a specific board from the store
+// IPC endpoint to handle loading tasks from a specific column from a specific board from the data.json
 ipcMain.handle("load_tasks", (event, columnId) => {
   try {
-    // Get all boards from store/data
+    // Get all boards from store/data.json
     const boards = store.get("boards") || [];
 
     // Find the board that contains the column with the matching columnId

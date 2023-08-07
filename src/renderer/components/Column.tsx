@@ -2,38 +2,25 @@ import { useEffect, useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Task from "./Task";
 
-// ipcrenderer
+// IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
 
 const Column = (props: any) => {
   // destructuring props
-  // const { column, tasks } = props;
   const { column, onAddTask, onColumnUpdate, onDeleteColumn } = props;
 
   // hooks
   const [newTaskName, setNewTaskName] = useState("");
   const [tasks, setTasks] = useState(column.tasks || ([] as any));
 
-  // useEffect(() => {
-  //   // Function to load tasks for the column from electron-store
-  //   const loadTasks = async () => {
-  //     try {
-  //       const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
-  //       setTasks(storedTasks);
-  //     } catch (err) {
-  //       console.error("Error loading tasks:", err);
-  //     }
-  //   };
-
-  //   loadTasks();
-  // }, [column.id]);
-
   useEffect(() => {
-    // Function to load tasks for the column from electron-store
+    // Function to load tasks for the specific column from electron-store/data.json
     const loadTasks = async () => {
       try {
         if (column.id) {
+          // load_tasks call to IpcMain process
           const storedTasks = await ipcRenderer.invoke("load_tasks", column.id);
+          // Update the state of tasks with the tasks stored in data.json
           setTasks(storedTasks);
         }
       } catch (err) {
@@ -44,8 +31,19 @@ const Column = (props: any) => {
     loadTasks();
   }, [column.id, tasks]);
 
-  // add tasks
+  // Function for saving tasks to electron-store/data.json
+  const saveTasksToDb = async (columnId: any, updatedTasks: any) => {
+    try {
+      // save_tasks call to IpcMain process
+      await ipcRenderer.invoke("save_tasks", columnId, updatedTasks);
+    } catch (err) {
+      console.error("Error saving Tasks:", err);
+    }
+  };
+
+  // Function to add new tasks
   const handleAddTask = async () => {
+    // If input is empty, return
     if (newTaskName.trim() === "") {
       return;
     }
@@ -56,15 +54,14 @@ const Column = (props: any) => {
     };
 
     onAddTask(column.id, newTask);
-    // setTasks((prevTasks: any) => [...prevTasks, newTask]);
 
+    // updated tasks is all the existing tasks and newly added task
     const updatedTasks = [...tasks, newTask];
 
+    // Update the state of tasks with the updated tasks
     setTasks(updatedTasks);
-
-    console.log("this is updated tasks", updatedTasks);
-
-    await ipcRenderer.invoke("save_tasks", column.id, updatedTasks);
+    // Save the updated tasks to data.json
+    saveTasksToDb(column.id, updatedTasks);
 
     setNewTaskName("");
   };
@@ -83,25 +80,15 @@ const Column = (props: any) => {
 
       // Update the state with the updated tasks
       setTasks(updatedTasks);
-
       // Save the updated tasks to data.json
-      await ipcRenderer.invoke("save_tasks", column.id, updatedTasks);
+      saveTasksToDb(column.id, updatedTasks);
     }
   };
-
-  // this is causing tasks to save in nested array in save data
-  // useEffect(() => {
-  //   // Call the parent function to update the board with the updated column
-  //   onColumnUpdate(tasks);
-  // }, [tasks]);
-
-  // const handleTaskInputChange = (e: any) => {
-  //   setNewTaskName(e.target.value);
-  // };
 
   return (
     <div className="column">
       <h3>{column.title}</h3>
+
       <Droppable droppableId={column.id}>
         {(provided) => (
           <div
