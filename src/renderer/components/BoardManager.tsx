@@ -126,6 +126,10 @@ const BoardManager = () => {
         ))}
       </div>
 
+      <div>
+        <Link to={"/about"}>About</Link>
+      </div>
+
       {/* this way boards id doesnt get lost when we redirect to board */}
       {/* conditional rendering */}
       {/* Render the Board component only if a board is selected */}
