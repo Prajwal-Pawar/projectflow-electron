@@ -11,7 +11,7 @@ const About = () => {
         <h2 className="greet">
           Hey i am
           <a href="https://github.com/Prajwal-Pawar" target="_blank">
-            <span className="name"> Prajwal Pawar. </span>
+            <span className="name"> Prajwal Pawar.</span>
           </a>
         </h2>
         <h3>MERN Stack developer, Linux and open source enthusiast</h3>
