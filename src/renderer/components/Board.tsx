@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "./Column";
+import "../styles/board.css";
 
 // IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
@@ -218,22 +219,16 @@ const Board = (props: any) => {
   return (
     <DragDropContext onDragEnd={handleDragTasks}>
       {/* rendering boards name */}
-      <h1>{currentBoard ? currentBoard.name : null}</h1>
+      <h1 className="board-name">{currentBoard ? currentBoard.name : null}</h1>
+
+      {/* using link for redirecting to all boards */}
+      <Link to="/">
+        <div className="back-link">Back</div>
+      </Link>
+
+      <hr />
 
       <div className="board">
-        {/* render all columns */}
-        {columns.map((column: any) => (
-          <Column
-            key={column.id}
-            column={column}
-            onAddTask={handleAddTask}
-            onColumnUpdate={(updatedTasks: any) =>
-              handleAddTask(column.id, updatedTasks)
-            }
-            onDeleteColumn={handleDeleteColumn}
-          />
-        ))}
-
         <div className="add-column">
           <input
             type="text"
@@ -247,7 +242,22 @@ const Board = (props: any) => {
         </div>
 
         {/* using link for redirecting to all boards */}
-        <Link to="/">Back</Link>
+        {/* <Link to="/">Back</Link> */}
+
+        <div className="columns">
+          {/* render all columns */}
+          {columns.map((column: any) => (
+            <Column
+              key={column.id}
+              column={column}
+              onAddTask={handleAddTask}
+              onColumnUpdate={(updatedTasks: any) =>
+                handleAddTask(column.id, updatedTasks)
+              }
+              onDeleteColumn={handleDeleteColumn}
+            />
+          ))}
+        </div>
       </div>
     </DragDropContext>
   );

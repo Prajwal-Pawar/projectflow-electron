@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Task from "./Task";
+import "../styles/column.css";
 
 // IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
@@ -87,7 +88,16 @@ const Column = (props: any) => {
 
   return (
     <div className="column">
-      <h3>{column.title}</h3>
+      <h3 className="column-title">{column.title}</h3>
+
+      <button
+        className="delete-column"
+        onClick={() => onDeleteColumn(column.id)}
+      >
+        Delete Column
+      </button>
+
+      <hr style={{ margin: "10px 0px" }} />
 
       <Droppable droppableId={column.id}>
         {(provided) => (
@@ -120,8 +130,6 @@ const Column = (props: any) => {
 
         <button onClick={handleAddTask}>Add Task</button>
       </div>
-
-      <button onClick={() => onDeleteColumn(column.id)}>Delete Column</button>
     </div>
   );
 };

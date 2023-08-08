@@ -1,4 +1,5 @@
 import { Draggable } from "react-beautiful-dnd";
+import "../styles/task.css";
 
 const Task = (props: any) => {
   // destructuring props
@@ -13,7 +14,7 @@ const Task = (props: any) => {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          {task.name}
+          <h3>{task.name}</h3>
 
           <button onClick={() => onDeleteTask(task.id)}>Delete Tasks</button>
         </div>

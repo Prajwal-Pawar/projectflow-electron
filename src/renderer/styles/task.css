@@ -1,0 +1,28 @@
+.task {
+  display: flex;
+  flex-direction: column;
+  border-radius: 7px;
+  background-color: #a4c3b2;
+  margin: 10px 0px;
+  padding: 10px;
+}
+
+.task h3 {
+  margin-bottom: 10px;
+}
+
+.task button {
+  padding: 10px 20px;
+  background-color: 1px solid #ffe5d9;
+  border: none;
+  border-radius: 7px;
+  color: #dc3545;
+  cursor: pointer;
+
+  transition: 0.2s ease-in-out;
+}
+
+.task button:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}

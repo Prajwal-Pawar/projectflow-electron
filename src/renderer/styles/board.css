@@ -1,0 +1,47 @@
+.board-name {
+  margin: 20px 0px 10px 0px;
+}
+
+.back-link {
+  margin-bottom: 10px;
+}
+
+.board {
+}
+
+.add-column {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.add-column input {
+  flex: 0.9;
+  padding: 10px;
+  font-size: 0.8rem;
+  border-radius: 7px;
+}
+
+.add-column button {
+  flex: 0.1;
+  padding: 12px 20px;
+  background-color: #0084ac;
+  color: #fefefe;
+  border: none;
+  border-radius: 7px;
+  margin: 0px 0px 0px 10px;
+  transition: 0.2s ease-in-out;
+}
+
+.add-column button:hover {
+  cursor: pointer;
+  background-color: #5390d9;
+  color: #fefefe;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  /* flex-wrap: nowrap; */
+}

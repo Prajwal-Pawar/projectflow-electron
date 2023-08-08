@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Board from "./Board";
+import "../styles/boardManager.css";
 
 // IpcRenderer to communicate from Renderer process to Main process
 const { ipcRenderer } = require("electron");
@@ -96,8 +97,14 @@ const BoardManager = () => {
   return (
     <div className="board-manager">
       {/* welcome message and boards count */}
-      <h2>Welcome Back!</h2>
-      <h3>You have {boards.length} active boards</h3>
+      <div className="welcome">
+        <h2 id="welcome-text">Welcome Back!</h2>
+        <h3 id="board-count">You have {boards.length} active boards</h3>
+      </div>
+
+      <div id="about">
+        <Link to={"/about"}>About</Link>
+      </div>
 
       <div className="add-board">
         <input
@@ -119,7 +126,7 @@ const BoardManager = () => {
               to={`/board/${board.id}`}
               onClick={() => handleBoardClick(board.id)}
             >
-              <h2>{board.name}</h2>
+              <h2 className="board-name">{board.name}</h2>
             </Link>
 
             {/* Delete board button */}
@@ -130,9 +137,9 @@ const BoardManager = () => {
         ))}
       </div>
 
-      <div>
+      {/* <div>
         <Link to={"/about"}>About</Link>
-      </div>
+      </div> */}
 
       {/* this way boards id doesnt get lost when we redirect to board */}
       {/* conditional rendering */}

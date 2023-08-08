@@ -1,0 +1,93 @@
+.board-manager {
+  padding: 20px;
+}
+
+.welcome {
+  margin-bottom: 20px;
+}
+
+.welcome #welcome-text {
+  font-size: 2rem;
+}
+
+.welcome #board-count {
+  font-size: 1rem;
+}
+
+.add-board {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-board input {
+  flex: 0.9;
+  padding: 10px;
+  font-size: 0.8rem;
+  border-radius: 7px;
+}
+
+.add-board button {
+  flex: 0.1;
+  padding: 12px 20px;
+  background-color: #0084ac;
+  color: #fefefe;
+  border: none;
+  border-radius: 7px;
+  margin: 0px 0px 0px 10px;
+  transition: 0.2s ease-in-out;
+}
+
+.add-board button:hover {
+  cursor: pointer;
+  background-color: #5390d9;
+  color: #fefefe;
+}
+
+.boards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* align-items: center;
+  justify-content: center; */
+}
+
+.boards .board-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+
+  /* width: 190px; */
+
+  background-color: #ffe5d9;
+
+  margin: 0px 20px 20px 0px;
+  padding: 10px;
+  border: 1px solid #000;
+  border-radius: 7px;
+}
+
+.boards .board-wrapper .board-name {
+  /* text-align: centexr; */
+}
+
+.boards .board-wrapper button {
+  margin: 20px 0px 0px 0px;
+  padding: 10px 20px;
+  background-color: transparent;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+
+  transition: 0.2s ease-in-out;
+}
+
+.boards .board-wrapper button:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#about {
+  margin-bottom: 20px;
+}
